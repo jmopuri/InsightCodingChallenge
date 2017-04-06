@@ -1,6 +1,3 @@
-#// your Python code to implement the features could be placed here
-#// note that you may use any language, there is no preference towards Python
-
 from datetime import *
 import operator
 
@@ -136,11 +133,9 @@ class Log:
         
 
 NASA_FanLog = Log()
-#NASA_FanLog.ReadLogFile(".\\testlog.txt")
-#NASA_FanLog.ReadLogFile(".\\log3.txt")
-NASA_FanLog.ReadLogFile(".\\log1.txt")
+NASA_FanLog.ReadLogFile(".\\log_input\\log.txt")
 #NASA_FanLog.PrintLogDetails()
-NASA_FanLog.PrintLogSummary()
+#NASA_FanLog.PrintLogSummary()
 
 #Feature1: Create a disctionary of addresses with the count of activity
 AddressByActivity = NASA_FanLog.GetAddressSortedByActivity()
@@ -211,25 +206,29 @@ def GetStartIndex(StTimeInterval, SortedTimeStamps):
         if( SortedTimeStamps[index] >= StTimeInterval ):
             return index
     return 0
-            
 
-print("===", GetStartIndex(MinTimeStamp + timedelta(0,60), SortedTimeStamps ) )
-                    
+
 for i in range( int((MaxTimeStamp-MinTimeStamp).total_seconds()) ):
-    StTimeInterval = MinTimeStamp + timedelta(0,i) # Add i seconds to first event
-    EndTimeInterval = StTimeInterval + timedelta(0,60) # Add 60 seconds to start interval
-    startIndex = PrevStartIndex + GetStartIndex(StTimeInterval, SortedTimeStamps[PrevStartIndex:])
-    CountOfEventsInInterval = CountEventsInInterval(SortedTimeStamps[startIndex:], StTimeInterval, EndTimeInterval )
+    StTimeInterval = MinTimeStamp + timedelta(0,i) # Add i*60 seconds to first event
+    EndTimeInterval = StTimeInterval + timedelta(0,3600) # Add 60 minutes to start interval
+    startIndex = PrevStartIndex + GetStartIndex(StTimeInterval, SortedTimeStamps[PrevStartIndex: PrevStartIndex+ 10000])
+    CountOfEventsInInterval = CountEventsInInterval(SortedTimeStamps[startIndex: startIndex + 10000], StTimeInterval, EndTimeInterval )
     updateTopTenBusyList(StTimeInterval, CountOfEventsInInterval)
     PrevStartIndex = startIndex            
-    if ( i % 100 ) == 0 :
-        print( "Processing :", i, "Prev Start Index: ", PrevStartIndex)
+    if ( i % 1000 ) == 0 :
+        print( "Processing :", i, " interval")
+
 
 #Write top 10 busy intervals to the file
 feature3 = open(".\\log_output\\hours.txt", "w")
 ctr = 1
-for BusyHour in BusyHours:
-        feature3.write(str(BusyHour))
+
+SortedBusyHours = sorted(BusyHours.items(), key=operator.itemgetter(1), reverse=True)
+#for BusyHour in BusyHours:
+for key, value in SortedBusyHours:
+        feature3.write(str(key))
+        feature3.write(",")
+        feature3.write(str(value))
         feature3.write("\n")
         if( ctr < 10 ):
                 ctr += 1
